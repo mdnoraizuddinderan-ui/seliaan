@@ -1,0 +1,63 @@
+SISTEM SELIAAN ODP DAN OBB: VERSI PERCUMA (TANPA PELAYAN, TANPA LANGGANAN)
+=========================================================================
+
+CARA IA BERFUNGSI
+- Setiap pegawai membuka satu pautan pada hp dan memilih "Tambah ke Skrin Utama".
+- Data disimpan DALAM HP ITU SAHAJA. Tiada pelayan, tiada akaun, tiada log masuk, tiada bayaran.
+- Aplikasi boleh digunakan tanpa internet selepas dibuka sekali dalam talian.
+- Untuk menyelaraskan data antara pegawai, hantar fail sandaran melalui WhatsApp.
+  Penerima memilih "Import dan gabung". Sistem menggabungkan mengikut No. KP:
+  rekod baharu ditambah, pelanggaran daripada kedua-dua pihak dikekalkan, dan maklumat
+  yang lebih baharu menggantikan yang lama. Mengimport fail yang sama dua kali tidak
+  menyebabkan rekod berganda.
+
+BAHAGIAN A: LETAKKAN APLIKASI DI SATU PAUTAN (PERCUMA, SEKALI SAHAJA, 15 MINIT)
+Aplikasi ini TIDAK mengandungi sebarang data pegawai atau OKP. Data hanya ada dalam hp.
+Oleh itu, tidak mengapa pautan atau repositori aplikasi ini awam.
+ 1. Buka https://github.com dan daftar akaun percuma.
+ 2. Klik "+" di penjuru atas > "New repository". Nama: seliaan. Pilih "Public". Klik "Create repository".
+ 3. Ekstrak (unzip) fail seliaan-percuma.zip pada komputer.
+ 4. Pada halaman repository, klik "uploading an existing file".
+ 5. Seret SEMUA fail dalam folder yang diekstrak (index.html, sw.js, manifest.webmanifest,
+    dan semua fail icon) ke halaman itu. Klik "Commit changes".
+ 6. Buka "Settings" > "Pages". Di bawah "Build and deployment", pilih Source: "Deploy from a branch",
+    Branch: "main", folder: "/ (root)". Klik "Save".
+ 7. Tunggu 1 hingga 3 minit. Segarkan halaman itu. Pautan anda muncul di bahagian atas, contohnya
+    https://namaanda.github.io/seliaan/
+ 8. Buka pautan itu pada hp anda untuk menguji.
+
+BAHAGIAN B: GUNA PADA HP (SETIAP PEGAWAI)
+ 1. Buka pautan dalam Chrome (Android) atau Safari (iPhone).
+ 2. Pilih "Tambah ke Skrin Utama" (menu pelayar). Selepas itu cukup tekan ikon.
+ 3. Tekan "Data dan PIN" > "Tetapkan atau tukar PIN". Aplikasi akan dikunci apabila dibuka semula
+    atau selepas ditinggalkan lebih 2 minit. Ini kunci aplikasi sahaja; sentiasa gunakan juga
+    kunci skrin hp.
+
+BAHAGIAN C: MENYELARASKAN DATA ANTARA PEGAWAI
+ Hantar:
+ 1. Tekan "Data dan PIN".
+ 2. Isi "Kata laluan fail" (disyorkan; semua pegawai guna kata laluan yang sama, yang anda tetapkan).
+    Fail disulitkan dengan kata laluan itu, jadi fail tidak boleh dibaca walaupun hp hilang atau
+    fail tersebar.
+ 3. Tekan "Eksport dan kongsi". Pilih WhatsApp (atau fail dimuat turun, kemudian dihantar secara manual).
+ Terima:
+ 1. Simpan fail daripada WhatsApp (tekan fail > simpan/muat turun).
+ 2. Buka aplikasi > "Data dan PIN" > isi kata laluan fail > "Import dan gabung" > pilih fail itu.
+ 3. Skrin memaparkan ringkasan: berapa rekod baharu dan berapa dikemas kini.
+
+CADANGAN CARA KERJA
+ - Tetapkan seorang pegawai sebagai "pusat". Beliau mengimport kemas kini daripada semua orang,
+   kemudian menghantar fail yang sudah lengkap kepada semua. Semua pegawai kemudian import fail itu.
+ - Lakukan sekurang-kurangnya sekali seminggu, dan simpan fail terkini sebagai sandaran.
+
+PERKARA PENTING
+ - Data hanya ada dalam hp. Jika aplikasi dipadam atau data pelayar dibersihkan, data hilang. Simpan
+   fail eksport sebagai sandaran secara berkala.
+ - Data TIDAK dikemas kini serta-merta antara pegawai; ia hanya selaras selepas fail dikongsi dan diimport.
+ - Rekod yang diedit oleh dua orang pada medan yang sama: yang diedit paling akhir menang. Pelanggaran
+   daripada kedua-dua pihak sentiasa dikekalkan.
+ - Lupa PIN: tekan "Lupa PIN" pada skrin kunci. Ini memadam data dalam hp itu, kemudian Import semula
+   daripada fail sandaran.
+ - Muat turun PDF dan Excel memerlukan internet sekali untuk memuatkan pustaka, kemudian boleh digunakan
+   tanpa internet.
+ - Pemadaman rekod belum ada pada skrin.
