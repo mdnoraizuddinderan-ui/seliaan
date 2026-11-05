@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Seliaan ODP dan OBB</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#1f3a5f"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Seliaan Parol">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#1f3a5f"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Seliaan Parol"><script src="firebase-config.js"></script>
 <style>
 :root{--bg:#eef1f5;--card:#fff;--tx:#17212e;--mu:#5a6676;--bd:#d6dce4;--ac:#1f3a5f;--acx:#fff;--wn:#a15c00;--wnb:#fff3de;--dg:#b3261e;--dgb:#fde8e6;--ok:#1b6b3f;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#19202a;--tx:#e8edf3;--mu:#97a3b3;--bd:#2c3644;--ac:#8fb4e8;--acx:#0d1520;--wn:#f0b45a;--wnb:#33280f;--dg:#ff8a80;--dgb:#3a1b19;--ok:#6fcf97;color-scheme:dark}}
@@ -68,16 +68,18 @@ td:nth-child(8){grid-column:2;grid-row:1/4;align-self:center}
 tbody td.empty{display:block!important;grid-column:1/-1;background:var(--card);border:1px solid var(--bd);border-radius:10px}
 .bar input,.bar select,.bar button{flex:1 1 100%}
 }
+#cl{max-width:380px;margin:60px auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}#cl label{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--mu)}#cl h2{margin:0;font-size:1.1rem}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 </head>
 <body>
+<section id="cl" hidden><h2>Log masuk</h2><label>ID pengguna<input id="clu" autocomplete="username" autocapitalize="none"></label><label>Katakunci<input id="clp" type="password" autocomplete="current-password"></label><div class="err" id="cle" role="alert"></div><button class="pri" id="clb">Log masuk</button><p class="hint" style="margin:0">Selepas log masuk, data diselaraskan antara semua peranti anda.</p></section>
 <section id="lk" hidden><h2>Aplikasi dikunci</h2><label>Masukkan PIN<input id="lpin" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label><div class="err" id="lerr" role="alert"></div><button class="pri" id="lgo">Buka</button><button class="sec" id="lforgot">Lupa PIN</button></section>
 <div class="wrap" id="app">
 <h1>Sistem Seliaan ODP dan OBB</h1>
-<div class="ub"><span>Data disimpan dalam peranti ini sahaja. (v1.4)</span><button class="sec" id="bdata">Data dan PIN</button></div>
+<div class="ub"><span id="who">Data disimpan dalam peranti ini sahaja. (v2.0)</span><button class="sec" id="bsync" hidden>Selaras</button><button class="sec" id="bdata">Data dan PIN</button><button class="sec" id="blout" hidden>Log keluar</button></div>
 <div class="tabs" id="main"><button class="on" data-m="odp">ODP</button><button data-m="obb">OBB</button></div>
 <section id="odp">
 <div class="tabs sub" id="sub"><button class="on" data-s="semasa">Seliaan semasa <span id="c1"></span></button><button data-s="gantung">Digantung / dibatalkan <span id="c3"></span></button><button data-s="bebas">Telah dibebaskan <span id="c2"></span></button><button data-s="pindah">Berpindah <span id="c4"></span></button></div>
@@ -182,8 +184,8 @@ var NOW=function(){return new Date().toISOString()},EPOCH="1970-01-01T00:00:00.0
 function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
 function load(){var r=[];try{var s=localStorage.getItem(C.sk);if(s)r=JSON.parse(s)}catch(e){}
 r.forEach(function(x){x.ru=x.ru||EPOCH;(x.pel||[]).forEach(function(p){p.pid=p.pid||uid();p.u=p.u||EPOCH});(x.pdh||[]).forEach(function(p){p.pid=p.pid||uid();p.u=p.u||EPOCH})});return r}
-var rows=load();DB.odp=rows;var HK="seliaan-cuti-v1",HOL={};loadHol();
-function save(){DB[C.key]=rows;try{localStorage.setItem(C.sk,JSON.stringify(rows));return true}catch(e){alert("Storan peranti penuh atau dihalang. Muat turun sandaran segera.");return false}}
+var rows=load();DB.odp=rows;var HK="seliaan-cuti-v1",HU="seliaan-cutiu-v1",HOL={};loadHol();
+function save(){DB[C.key]=rows;try{localStorage.setItem(C.sk,JSON.stringify(rows));kick();return true}catch(e){alert("Storan peranti penuh atau dihalang. Muat turun sandaran segera.");return false}}
 
 var tab="semasa",editId=null;
 var $=function(id){return document.getElementById(id)};
@@ -344,7 +346,7 @@ $('qmsg').textContent=!k?(q.lulus?'Disimpan. Alamat baharu digunakan dalam lapor
 var DAYN=['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
 function loadHol(){var l=[];try{l=JSON.parse(localStorage.getItem(HK)||'[]')}catch(e){}HOL={};l.forEach(function(x){if(x&&/^\d{4}-\d{2}-\d{2}$/.test(x.d))HOL[x.d]=x.n||'Cuti umum'})}
 function holList(){return Object.keys(HOL).sort().map(function(k){return{d:k,n:HOL[k]}})}
-function saveHol(){try{localStorage.setItem(HK,JSON.stringify(holList()))}catch(e){}}
+function saveHol(){try{localStorage.setItem(HK,JSON.stringify(holList()));localStorage.setItem(HU,NOW())}catch(e){}kick()}
 function ymd(ms){var d=new Date(ms);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())}
 function isOff(s){var w=new Date(T(s)).getUTCDay();return w===0||w===6||!!HOL[s]}
 function offWhy(s){var w=new Date(T(s)).getUTCDay();return w===6?'hari Sabtu':w===0?'hari Ahad':HOL[s]?'cuti umum ('+HOL[s]+')':''}
@@ -354,6 +356,63 @@ $('dhol').addEventListener('click',function(){$('hmsg').textContent='';hdraw();$
 $('hclose').addEventListener('click',function(){$('hdlg').close()});
 $('hadd').addEventListener('click',function(){var d=$('hdate').value,n=$('hname').value.trim();if(!d){$('hmsg').textContent='Pilih tarikh.';return}var w=new Date(T(d)).getUTCDay();HOL[d]=n||'Cuti umum';saveHol();$('hdate').value='';$('hname').value='';$('hmsg').textContent=(w===0||w===6)?'Disimpan. Nota: tarikh ini hujung minggu, yang sudah dikira secara automatik.':'Disimpan.';hdraw();render()});
 $('hlist').addEventListener('click',function(e){var b=e.target.closest('button[data-hd]');if(!b)return;delete HOL[b.dataset.hd];saveHol();hdraw();render()});
+var CFG=(window.SLN_FB&&window.SLN_FB.apiKey&&window.SLN_FB.projectId)?window.SLN_FB:null,AK='seliaan-auth-v1',WMK='seliaan-wm-v1',RCK='seliaan-rc-v1',AUTH=null,syncing=false,kt=null,cfgTick=0,RCM={};
+try{RCM=JSON.parse(localStorage.getItem(RCK)||'{}')}catch(e){RCM={}}
+function saveRC(){try{localStorage.setItem(RCK,JSON.stringify(RCM))}catch(e){}}
+function kick(){if(!CFG||!AUTH)return;clearTimeout(kt);kt=setTimeout(function(){syncNow()},1500)}
+function setSyn(t){$('who').textContent=t+' (v2.0)'}
+function fbBase(){return 'https://firestore.googleapis.com/v1/projects/'+CFG.projectId+'/databases/(default)/documents'}
+function loadAuth(){try{AUTH=JSON.parse(localStorage.getItem(AK)||'null')}catch(e){AUTH=null}}
+function saveAuth(){try{if(AUTH)localStorage.setItem(AK,JSON.stringify(AUTH));else localStorage.removeItem(AK)}catch(e){}}
+function gate(){var need=!!CFG&&!AUTH,locked=!$('lk').hidden;$('cl').hidden=!(need&&!locked);$('app').hidden=locked||need;$('blout').hidden=!(CFG&&AUTH);$('bsync').hidden=!(CFG&&AUTH);if(!CFG)setSyn('Data disimpan dalam peranti ini sahaja.');}
+function amsg(m){var t={EMAIL_NOT_FOUND:'ID pengguna atau katakunci tidak betul.',INVALID_PASSWORD:'ID pengguna atau katakunci tidak betul.',INVALID_LOGIN_CREDENTIALS:'ID pengguna atau katakunci tidak betul.',USER_DISABLED:'Akaun ini telah dinyahaktifkan.',TOO_MANY_ATTEMPTS_TRY_LATER:'Terlalu banyak cubaan. Cuba lagi sebentar lagi.',OPERATION_NOT_ALLOWED:'Log masuk E-mel/Katakunci belum dihidupkan di Firebase (Authentication, Sign-in method).','API key not valid':'Kunci API dalam firebase-config.js tidak sah. Semak semula salinan kunci itu.',CONFIGURATION_NOT_FOUND:'Authentication belum dihidupkan di projek Firebase. Klik Get started pada Authentication.',INVALID_API_KEY:'Kunci API dalam firebase-config.js tidak sah. Semak semula salinan kunci itu.'};for(var k in t)if(String(m||'').indexOf(k)===0)return t[k];return 'Log masuk gagal. Semak sambungan internet.'}
+function toEmail(id){id=id.trim();return id.indexOf('@')>-1?id:id+'@'+(CFG.domain||'seliaan.example.com')}
+async function signIn(id,pw){var r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+CFG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:toEmail(id),password:pw,returnSecureToken:true})}),j={};try{j=await r.json()}catch(e){}
+if(!r.ok)throw new Error(amsg(j.error&&j.error.message));AUTH={idToken:j.idToken,refresh:j.refreshToken,exp:Date.now()+(+j.expiresIn-60)*1000,email:j.email};saveAuth()}
+async function refreshTok(){var r=await fetch('https://securetoken.googleapis.com/v1/token?key='+CFG.apiKey,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.refresh)}),j={};try{j=await r.json()}catch(e){}
+if(!r.ok){var m=(j.error&&j.error.message)||'';if(/TOKEN_EXPIRED|USER_DISABLED|USER_NOT_FOUND|INVALID_REFRESH_TOKEN/.test(m)){AUTH=null;saveAuth();gate()}throw new Error('auth')}
+AUTH.idToken=j.id_token;AUTH.refresh=j.refresh_token;AUTH.exp=Date.now()+(+j.expires_in-60)*1000;saveAuth()}
+async function fsr(method,path,body,retry){if(!AUTH)throw new Error('auth');if(Date.now()>AUTH.exp)await refreshTok();
+var r=await fetch(fbBase()+path,{method:method,headers:{'Authorization':'Bearer '+AUTH.idToken,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+if(r.status===401&&!retry){await refreshTok();return fsr(method,path,body,true)}
+var j=null;try{j=await r.json()}catch(e){}
+if(!r.ok){var er=new Error((j&&j.error&&j.error.message)||('HTTP '+r.status));er.status=r.status;throw er}return j}
+function strip(r){var o={};Object.keys(r).forEach(function(k){if(k!=='id')o[k]=r[k]});return o}
+function sk(v){if(Array.isArray(v))return v.map(sk);if(v&&typeof v==='object'){var o={};Object.keys(v).sort().forEach(function(k){o[k]=sk(v[k])});return o}return v}
+function canon(r){var o=strip(r);['pel','pdh'].forEach(function(k){if(o[k])o[k]=o[k].slice().sort(function(a,b){return a.pid<b.pid?-1:a.pid>b.pid?1:0})});return JSON.stringify(sk(o))}
+function ch(r){var s=canon(r),x=2166136261;for(var i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)}return (x>>>0).toString(36)+'.'+s.length}
+function mergeRemote(inc){var d=allData(),c=false;['odp','obb'].forEach(function(k){if(!inc[k].length)return;var r=mergeInto(d[k],inc[k]);if(r.add||r.upd)c=true});if(c){rows=DB[C.key];saveAll();if(!$('dlg').open)render()}}
+async function pullAll(){var wm=localStorage.getItem(WMK)||'',total=0;
+for(var pg=0;pg<50;pg++){var sq={from:[{collectionId:'rec'}],orderBy:[{field:{fieldPath:'su'},direction:'ASCENDING'}],limit:500};
+if(wm)sq.where={fieldFilter:{field:{fieldPath:'su'},op:'GREATER_THAN',value:{timestampValue:wm}}};
+var res=await fsr('POST',':runQuery',{structuredQuery:sq}),docs=(res||[]).filter(function(x){return x.document}).map(function(x){return x.document}),inc={odp:[],obb:[]};
+docs.forEach(function(d){var f=d.fields||{};try{var rec=JSON.parse(f.j.stringValue),m=f.mod.stringValue;if(inc[m]&&rec&&rec.kp){inc[m].push(rec);RCM[m+'|'+rec.kp]=ch(rec)}}catch(e){}});
+mergeRemote(inc);total+=docs.length;
+if(!docs.length)break;
+var last=docs[docs.length-1].fields.su.timestampValue;
+if(docs.length<500){wm=last;break}
+var prev=docs.filter(function(d){return d.fields.su.timestampValue<last});wm=prev.length?prev[prev.length-1].fields.su.timestampValue:last;if(!prev.length)break}
+try{localStorage.setItem(WMK,wm)}catch(e){}saveRC();return total}
+async function pushDirty(){var d=allData(),w=[];['odp','obb'].forEach(function(k){d[k].forEach(function(r){var key=k+'|'+r.kp,c=ch(r);if(RCM[key]!==c)w.push({k:k,r:r,key:key,c:c})})});
+for(var i=0;i<w.length;i+=100){var part=w.slice(i,i+100);
+await fsr('POST',':commit',{writes:part.map(function(x){return{update:{name:'projects/'+CFG.projectId+'/databases/(default)/documents/rec/'+x.k+'_'+x.r.kp,fields:{mod:{stringValue:x.k},kp:{stringValue:x.r.kp},j:{stringValue:JSON.stringify(strip(x.r))}}},updateTransforms:[{fieldPath:'su',setToServerValue:'REQUEST_TIME'}]}})});
+part.forEach(function(x){RCM[x.key]=x.c})}
+saveRC();return w.length}
+async function syncCuti(){var rem=null;try{var d=await fsr('GET','/cfg/cuti');rem={u:d.fields.u.stringValue,l:JSON.parse(d.fields.j.stringValue)}}catch(e){if(e.status!==404)throw e}
+var lu=localStorage.getItem(HU)||'';
+if(rem&&rem.u>lu){HOL={};rem.l.forEach(function(x){if(x&&x.d)HOL[x.d]=x.n||'Cuti umum'});try{localStorage.setItem(HK,JSON.stringify(holList()));localStorage.setItem(HU,rem.u)}catch(e){}render()}
+else if((!rem&&holList().length)||(rem&&lu>rem.u)){await fsr('POST',':commit',{writes:[{update:{name:'projects/'+CFG.projectId+'/databases/(default)/documents/cfg/cuti',fields:{u:{stringValue:lu||NOW()},j:{stringValue:JSON.stringify(holList())}}}}]})}}
+async function syncNow(manual){if(!CFG||!AUTH||syncing)return;if(navigator.onLine===false){setSyn('Luar talian, data disimpan dalam peranti');return}
+syncing=true;setSyn('Menyelaras...');
+try{await pullAll();await pushDirty();if(manual||(++cfgTick%8)===1)await syncCuti();setSyn('Selaras '+new Date().toTimeString().slice(0,5))}
+catch(e){setSyn(e.message==='auth'?'Sila log masuk semula':(e.status===403?'Akses ditolak. Semak akaun anda':'Luar talian, data disimpan dalam peranti'))}
+syncing=false}
+$('clb').addEventListener('click',async function(){$('cle').textContent='';try{await signIn($('clu').value,$('clp').value);$('clp').value='';gate();syncNow(true)}catch(e){$('cle').textContent=e.message}});
+$('clp').addEventListener('keydown',function(e){if(e.key==='Enter')$('clb').click()});
+$('blout').addEventListener('click',function(){if(!confirm('Log keluar? Data dalam peranti ini kekal.'))return;AUTH=null;saveAuth();gate()});
+$('bsync').addEventListener('click',function(){syncNow(true)});
+setInterval(function(){if(!document.hidden&&AUTH)syncNow()},40000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&AUTH)syncNow()});
 var FIELDS=['nama','kp','smpp','jantina','agama','bangsa','perintah','dari','kes','mula','tamat','tempoh','daerah','kerja','pejabat','jenisAlamat','alamat'];
 function loadMod(k){var c=C;C=MODS[k];var r=load();C=c;return r}
 function allData(){if(!DB.obb)DB.obb=loadMod('obb');if(!DB.odp)DB.odp=loadMod('odp');return{odp:DB.odp,obb:DB.obb}}
@@ -396,9 +455,9 @@ var PINK='seliaan-pin',tries=0,lockUntil=0,hiddenAt=0;
 function pinCfg(){try{return JSON.parse(localStorage.getItem(PINK)||'null')}catch(e){return null}}
 async function pinHash(pin,salt){var b=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']);return b64(await crypto.subtle.deriveBits({name:'PBKDF2',salt:unb64(salt),iterations:150000,hash:'SHA-256'},b,256))}
 function lockNow(){if(!pinCfg())return;[].forEach.call(document.querySelectorAll('dialog[open]'),function(d){d.close()});$('app').hidden=true;$('lk').hidden=false;$('lpin').value='';$('lerr').textContent=''}
-async function tryUnlock(){var c=pinCfg();if(!c){$('lk').hidden=true;$('app').hidden=false;return}
+async function tryUnlock(){var c=pinCfg();if(!c){$('lk').hidden=true;gate();return}
 if(Date.now()<lockUntil){$('lerr').textContent='Terlalu banyak cubaan. Cuba lagi sebentar.';return}
-if(await pinHash($('lpin').value,c.s)===c.h){tries=0;$('lk').hidden=true;$('app').hidden=false;$('lpin').value=''}else{if(++tries>=5){lockUntil=Date.now()+30000;tries=0}$('lerr').textContent='PIN tidak betul.'}}
+if(await pinHash($('lpin').value,c.s)===c.h){tries=0;$('lk').hidden=true;gate();$('lpin').value=''}else{if(++tries>=5){lockUntil=Date.now()+30000;tries=0}$('lerr').textContent='PIN tidak betul.'}}
 $('lgo').addEventListener('click',tryUnlock);$('lpin').addEventListener('keydown',function(e){if(e.key==='Enter')tryUnlock()});
 $('lforgot').addEventListener('click',function(){if(confirm('Lupa PIN hanya boleh diselesaikan dengan MEMADAM semua data dalam peranti ini. Anda boleh Import semula daripada fail sandaran. Teruskan?')){try{Object.keys(localStorage).filter(function(k){return k.indexOf('seliaan-')===0}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}location.reload()}});
 $('dpin').addEventListener('click',async function(){var m=$('dmsg');if(!(window.crypto&&crypto.subtle)){m.textContent='PIN tidak disokong dalam pelayar ini.';return}
@@ -409,7 +468,7 @@ $('dpinoff').addEventListener('click',async function(){var m=$('dmsg'),c=pinCfg(
 var p=prompt('Masukkan PIN semasa untuk membuangnya:');if(p===null)return;if(await pinHash(p,c.s)===c.h){localStorage.removeItem(PINK);m.textContent='PIN dibuang.'}else m.textContent='PIN tidak betul.'});
 document.addEventListener('visibilitychange',function(){if(document.hidden)hiddenAt=Date.now();else if(pinCfg()&&hiddenAt&&Date.now()-hiddenAt>120000)lockNow()});
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(function(){});
-if(pinCfg())lockNow();
+loadAuth();if(pinCfg())lockNow();gate();if(CFG&&AUTH)syncNow(true);
 </script>
 </body>
 </html>
